@@ -1,0 +1,24 @@
+{
+  "name": "杭州百事新规喷码生成器",
+  "short_name": "喷码生成器",
+  "description": "杭州百事新规喷码生成器 - 支持瓶盖、膜包、BIB三种打印模式",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",  // 与HTML中的theme-color保持一致
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

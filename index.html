@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#667eea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="喷码生成器">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+  <title>新规喷码生成器</title>
+  <!-- 引入分离的样式文件 -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">杭州百事新规喷码生成器</div>
+        <div class="header-subtitle">PepsiCo Hangzhou</div>
+    </div>
+
+    <div class="time-card">
+        <div class="time-info">
+            <div>
+                <div class="time-text">当前系统时间:</div>
+                <div class="time-value" id="currentDateTime">--:--:--</div>
+            </div>
+        </div>
+        <button class="sync-btn" id="syncBtn">同步系统时间</button>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-tag blue">1</div>
+                <div class="card-title">参数设置</div>
+            </div>
+
+            <div class="form-item">
+                <label class="form-label">打印模式</label>
+                <div class="print-mode-btns">
+                    <button type="button" class="mode-btn active" id="printModeNormal" data-mode="normal">常规打印</button>
+                    <button type="button" class="mode-btn" id="printModeShort" data-mode="short">缩短打印</button>
+                    <button type="button" class="mode-btn" id="printModeBib" data-mode="bib">BIB打印</button>
+                </div>
+                <div class="form-hint">（针对瓶肩喷码生产时间转换，外箱喷码不影响）常规打印：24小时制 | 缩短打印：字母+分 | BIB：BIB线专用</div>
+            </div>
+
+            <div class="form-item">
+                <label class="form-label">生产线别</label>
+                <select class="form-select" id="lineSelect">
+                    <option value="">请选择生产线</option>
+                    <option value="A">A 线 →  1</option>
+                    <option value="B">B 线 →  2</option>
+                    <option value="C">C 线 →  3</option>
+                    <option value="D">D 线 → 4</option>
+                    <option value="E">E 线 →  5</option>
+                    <option value="F">F 线 →  6</option>
+                </select>
+                <div class="form-hint">A-F 线别将转换为数字 1-6 显示在喷码；BIB1/BIB2 线需选择缸号</div>
+            </div>
+
+            <div class="form-item" id="tankContainer" style="display: none;">
+                <label class="form-label">缸号输入</label>
+                <input type="number" class="form-select" id="tankInput" min="1" max="25" placeholder="请输入缸号（1-25）">
+                <div class="form-hint">BIB打印模式需输入缸号（1-25号缸）</div>
+            </div>
+
+            <div class="form-item">
+                <label class="form-label">代加工委托工厂</label>
+                <select class="form-select" id="factorySelect">
+                    <option value="">自产（无委托）</option>
+                    <option value="WH">武汉百事 WH</option>
+                    <option value="SH">上海百事 SH</option>
+                    <option value="AH">安徽百事 AH</option>
+                    <option value="NJ">南京百事 NJ</option>
+                </select>
+                <div class="form-hint">委托厂显示示例：上海 <span class="highlight">S</span><span class="highlight">H</span>，武汉 <span class="highlight">W</span><span class="highlight">H</span></div>
+            </div>
+
+            <div class="form-item">
+                <label class="form-label">保质期天数</label>
+                <select class="form-select" id="shelfLife">
+                    <option value="270">270 天</option>
+                    <option value="365">365 天</option>
+                </select>
+                <div class="form-hint">根据标签或罐身标注保质期天数选择；BIB线仅支持100天和120天</div>
+            </div>
+
+            <div class="form-item" id="qrCodeContainer">
+                <label class="form-label">外箱是否喷印二维码</label>
+                <select class="form-select" id="qrCodeOption">
+                    <option value="N">否</option>
+                    <option value="Y">是</option>
+                </select>
+                <div class="form-hint">选择 "是" 外箱喷码将加入二维码 ▣ 顺序箱码 00001</div>
+            </div>
+
+            <button class="btn-primary" id="generateBtn">生成喷码</button>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <div class="card" id="innerResult">
+                <div class="card-header">
+                    <div class="card-tag blue">2</div>
+                    <div class="card-title">瓶肩|罐底喷码</div>
+                </div>
+                <div class="code-box">
+                    <div class="code-box-title"><span class="dot"></span>喷码内容</div>
+                    <div class="code-line" id="innerLine1"></div>
+                    <div class="code-line" id="innerLine2"></div>
+                </div>
+                <div class="parse-table" id="innerParseTable"></div>
+            </div>
+            
+            <div class="card" id="outerResult">
+                <div class="card-header">
+                    <div class="card-tag green">3</div>
+                    <div class="card-title">外箱喷码</div>
+                </div>
+                <div class="code-box">
+                    <div class="code-box-title"><span class="dot"></span>喷码内容</div>
+                    <div class="code-line" id="outerLine1"></div>
+                    <div class="code-line" id="outerLine2"></div>
+                </div>
+                <div class="parse-table" id="outerParseTable"></div>
+            </div>
+            
+            <div class="card" id="bibResult" style="display: none;">
+                <div class="card-header">
+                    <div class="card-tag orange">BIB</div>
+                    <div class="card-title">BIB喷码</div>
+                </div>
+                <div class="code-box">
+                    <div class="code-box-title"><span class="dot"></span>喷码内容</div>
+                    <div class="code-line" id="bibLine1"></div>
+                    <div class="code-line" id="bibLine2"></div>
+                </div>
+                <div class="parse-table" id="bibParseTable"></div>
+            </div>
+        </div>
+
+        <div class="footer-tip">
+            <div class="footer-tip-title">喷码格式说明</div>
+            <div class="footer-tip-list">
+                <strong style="color: #d46b08; display: block; margin-bottom: 8px;">【瓶肩|罐底喷码】两行格式：</strong>
+                • 第一行：<span class="highlight">8 位生产日期</span> + <span class="highlight">时间代码</span>（缩短喷码 字母时+2位分|常规喷码 HH:MM）+ <span class="highlight">HZ</span>（工厂代码）+ <span class="highlight">线别 1-6</span> + <span class="highlight">委托厂</span>）+ <span class="highlight">委托厂首字母</span><br>
+                • 第二行：<span class="highlight">8 位到期日期</span> + <span class="highlight">HZ</span>（工厂代码）+ <span class="highlight">线别 1-6</span> + <span class="highlight">委托厂尾字母</span><br>
+                <strong style="color: #d46b08; display: block; margin: 12px 0 8px;">【外箱喷码】两行格式：</strong>
+                • 第一行：<span class="highlight">8 位生产日期</span> + <span class="highlight">5 位数字时间</span> + <span class="highlight">合格</span> + (可选二维码)<span class="highlight">委托厂首字母</span><br>
+                • 第二行：<span class="highlight">8 位到期日期</span> + <span class="highlight">HZ</span>（工厂代码）+ <span class="highlight">线别 1-6</span> + <span class="highlight">(可选二维码 +箱顺序码00001)委托厂尾字母（如有）</span><br>
+                <strong style="color: #d46b08; display: block; margin: 12px 0 8px;">【BIB喷码】两行格式：</strong>
+                • 第一行：<span class="highlight">8 位生产日期</span> + <span class="highlight">5 位箱顺序码</span> + <span class="highlight">委托厂首字母</span><br>
+                • 第二行：<span class="highlight">8 位到期日期</span> + <span class="highlight">HZ</span>（工厂代码）+ <span class="highlight">（BIB1/BIB2线）+ <span class="highlight">缸号 01-25</span> + <span class="highlight">委托厂尾字母（如有）</span><br>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        杭州百事新规喷码生成器|适用于喷码核验检查参考
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
